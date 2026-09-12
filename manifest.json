@@ -1,0 +1,10 @@
+{
+  "name": "Study Point Library",
+  "short_name": "Study Point",
+  "description": "Study Point Library student membership and seat management portal.",
+  "start_url": "./",
+  "display": "standalone",
+  "background_color": "#0b1220",
+  "theme_color": "#0b1220",
+  "icons": []
+}
