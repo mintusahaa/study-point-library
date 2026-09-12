@@ -1,6 +1,6 @@
 /* =========================================================
    STUDY POINT LIBRARY
-   Supabase Frontend
+   Supabase Frontend - Complete Version
    ========================================================= */
 
 const { createClient } = window.supabase;
@@ -15,7 +15,9 @@ let currentProfile = null;
 let allSeats = [];
 
 
-/* ================= HELPERS ================= */
+/* =========================================================
+   HELPERS
+   ========================================================= */
 
 const $ = (id) => document.getElementById(id);
 
@@ -28,19 +30,38 @@ function escapeHTML(value) {
     .replaceAll("'", "&#039;");
 }
 
+
 function showModal(html) {
+
+  if (!$("modal") || !$("modalContent")) {
+    alert(
+      String(html)
+        .replace(/<[^>]*>/g, " ")
+        .replace(/\s+/g, " ")
+    );
+
+    return;
+  }
+
   $("modalContent").innerHTML = html;
   $("modal").classList.remove("hidden");
 }
 
+
 function closeModal() {
-  $("modal").classList.add("hidden");
+
+  if ($("modal")) {
+    $("modal").classList.add("hidden");
+  }
 }
+
 
 window.closeModal = closeModal;
 
 
-/* ================= SEATS ================= */
+/* =========================================================
+   SEATS
+   ========================================================= */
 
 async function loadSeats() {
 
@@ -51,14 +72,18 @@ async function loadSeats() {
     .order("seat_number");
 
   if (error) {
-    console.error(error);
 
-    $("seatMap").innerHTML = `
-      <div class="info-card">
-        <h3>Unable to load seats</h3>
-        <p>${escapeHTML(error.message)}</p>
-      </div>
-    `;
+    console.error("Seats:", error);
+
+    if ($("seatMap")) {
+
+      $("seatMap").innerHTML = `
+        <div class="info-card">
+          <h3>Unable to load seats</h3>
+          <p>${escapeHTML(error.message)}</p>
+        </div>
+      `;
+    }
 
     return;
   }
@@ -74,13 +99,17 @@ function renderSeats() {
 
   const map = $("seatMap");
 
+  if (!map) return;
+
   if (!allSeats.length) {
+
     map.innerHTML = `
       <div class="info-card">
         <h3>No seats found</h3>
         <p>Please check your Supabase seats table.</p>
       </div>
     `;
+
     return;
   }
 
@@ -106,7 +135,7 @@ function renderHall(name, seats) {
 
       <div class="section-head">
         <div>
-          <span class="eyebrow">${name}</span>
+          <span class="eyebrow">${escapeHTML(name)}</span>
           <h3>Seat Map</h3>
         </div>
       </div>
@@ -115,12 +144,15 @@ function renderHall(name, seats) {
 
         ${seats.map(seat => {
 
-          const status = seat.status || "available";
+          const status =
+            seat.status || "available";
 
           const icon =
-            status === "occupied" ? "🔴" :
-            status === "reserved" ? "🟡" :
-            "🟢";
+            status === "occupied"
+              ? "🔴"
+              : status === "reserved"
+                ? "🟡"
+                : "🟢";
 
           return `
             <button
@@ -128,8 +160,13 @@ function renderHall(name, seats) {
               onclick="selectSeat('${seat.id}')"
               ${status !== "available" ? "disabled" : ""}
             >
+
               <span>${icon}</span>
-              <b>${escapeHTML(seat.seat_number)}</b>
+
+              <b>
+                ${escapeHTML(seat.seat_number)}
+              </b>
+
             </button>
           `;
 
@@ -143,29 +180,39 @@ function renderHall(name, seats) {
 
 function updateSeatCounters() {
 
-  const available = allSeats.filter(
-    seat => seat.status === "available"
-  ).length;
+  const available =
+    allSeats.filter(
+      seat => seat.status === "available"
+    ).length;
 
-  const occupied = allSeats.filter(
-    seat => seat.status === "occupied"
-  ).length;
+  const occupied =
+    allSeats.filter(
+      seat => seat.status === "occupied"
+    ).length;
 
   if ($("availableCount")) {
-    $("availableCount").textContent = available;
+    $("availableCount").textContent =
+      available;
   }
 
   if ($("insideCount")) {
-    $("insideCount").textContent = occupied;
+    $("insideCount").textContent =
+      occupied;
   }
 
   document.querySelectorAll(
     ".mini-stats div:first-child b"
   ).forEach(el => {
-    el.textContent = allSeats.length;
+
+    el.textContent =
+      allSeats.length;
   });
 }
 
+
+/* =========================================================
+   SELECT SEAT
+   ========================================================= */
 
 window.selectSeat = function(seatId) {
 
@@ -185,7 +232,7 @@ window.selectSeat = function(seatId) {
       <h2>Seat ${escapeHTML(seat.seat_number)}</h2>
 
       <p>
-        This seat is available.
+        This seat is currently available.
       </p>
 
       <button
@@ -203,11 +250,12 @@ window.selectSeat = function(seatId) {
     <h2>Seat ${escapeHTML(seat.seat_number)}</h2>
 
     <p>
-      Hall: ${escapeHTML(seat.hall)}
+      <strong>Hall:</strong>
+      ${escapeHTML(seat.hall)}
     </p>
 
     <p>
-      Seat is currently available.
+      This seat is available.
     </p>
 
     <button
@@ -220,27 +268,75 @@ window.selectSeat = function(seatId) {
 };
 
 
-window.requestSeat = function(seatId) {
+/* =========================================================
+   BOOK SEAT
+   ========================================================= */
+
+window.requestSeat = async function(seatId) {
+
+  if (!currentUser) {
+
+    openLogin();
+    return;
+  }
 
   showModal(`
-    <h2>Seat Selection</h2>
+    <h2>Booking Seat...</h2>
+    <p>Please wait.</p>
+  `);
+
+  const { data, error } =
+    await supabaseClient.rpc(
+      "book_seat",
+      {
+        p_seat_id: seatId
+      }
+    );
+
+  if (error) {
+
+    console.error("Book seat:", error);
+
+    showModal(`
+      <h2>❌ Seat Booking Failed</h2>
+
+      <p>
+        ${escapeHTML(error.message)}
+      </p>
+
+      <button
+        class="btn btn-outline full"
+        onclick="closeModal()"
+      >
+        Close
+      </button>
+    `);
+
+    return;
+  }
+
+  showModal(`
+    <h2>✅ Seat Reserved</h2>
 
     <p>
-      Your seat selection system will be connected
-      to the membership/booking system next.
+      Your seat has been reserved successfully.
     </p>
 
     <button
-      class="btn btn-outline full"
+      class="btn btn-primary full"
       onclick="closeModal()"
     >
-      Close
+      Done
     </button>
   `);
+
+  await loadSeats();
 };
 
 
-/* ================= AUTH ================= */
+/* =========================================================
+   AUTH - CURRENT USER
+   ========================================================= */
 
 async function loadCurrentUser() {
 
@@ -248,32 +344,49 @@ async function loadCurrentUser() {
     data: { user }
   } = await supabaseClient.auth.getUser();
 
-  currentUser = user || null;
+  currentUser =
+    user || null;
 
   if (currentUser) {
+
     await loadProfile();
+
   } else {
+
+    currentProfile = null;
+
     updateDashboard();
   }
 }
 
 
+/* =========================================================
+   PROFILE
+   ========================================================= */
+
 async function loadProfile() {
 
   if (!currentUser) return;
 
-  const { data, error } = await supabaseClient
-    .from("profiles")
-    .select("*")
-    .eq("id", currentUser.id)
-    .maybeSingle();
+  const { data, error } =
+    await supabaseClient
+      .from("profiles")
+      .select("*")
+      .eq("id", currentUser.id)
+      .maybeSingle();
 
   if (error) {
-    console.error("Profile:", error);
+
+    console.error(
+      "Profile:",
+      error
+    );
+
     return;
   }
 
-  currentProfile = data || null;
+  currentProfile =
+    data || null;
 
   updateDashboard();
 
@@ -282,19 +395,58 @@ async function loadProfile() {
 }
 
 
+/* =========================================================
+   DASHBOARD
+   ========================================================= */
+
 function updateDashboard() {
+
+  if (!$("studentName")) return;
 
   if (!currentUser) {
 
-    $("studentName").textContent = "Student";
-    $("studentId").textContent = "ID: —";
-    $("studentSeat").textContent = "—";
-    $("studentPlan").textContent = "—";
-    $("studentValidity").textContent = "—";
-    $("paymentStatus").textContent = "—";
-    $("studyTime").textContent = "0h 0m";
-    $("liveBadge").textContent = "Logged out";
-    $("checkBtn").textContent = "Login to Check In";
+    $("studentName").textContent =
+      "Student";
+
+    if ($("studentId")) {
+      $("studentId").textContent =
+        "ID: —";
+    }
+
+    if ($("studentSeat")) {
+      $("studentSeat").textContent =
+        "—";
+    }
+
+    if ($("studentPlan")) {
+      $("studentPlan").textContent =
+        "—";
+    }
+
+    if ($("studentValidity")) {
+      $("studentValidity").textContent =
+        "—";
+    }
+
+    if ($("paymentStatus")) {
+      $("paymentStatus").textContent =
+        "—";
+    }
+
+    if ($("studyTime")) {
+      $("studyTime").textContent =
+        "0h 0m";
+    }
+
+    if ($("liveBadge")) {
+      $("liveBadge").textContent =
+        "Logged out";
+    }
+
+    if ($("checkBtn")) {
+      $("checkBtn").textContent =
+        "Login to Check In";
+    }
 
     return;
   }
@@ -304,15 +456,29 @@ function updateDashboard() {
     currentUser.email ||
     "Student";
 
-  $("studentId").textContent =
-    `ID: ${currentProfile?.student_id || "—"}`;
+  if ($("studentId")) {
 
-  $("liveBadge").textContent = "Logged in";
-  $("checkBtn").textContent = "Check In / Check Out";
+    $("studentId").textContent =
+      `ID: ${currentProfile?.student_id || "—"}`;
+  }
+
+  if ($("liveBadge")) {
+
+    $("liveBadge").textContent =
+      "Logged in";
+  }
+
+  if ($("checkBtn")) {
+
+    $("checkBtn").textContent =
+      "Check In / Check Out";
+  }
 }
 
 
-/* ================= LOGIN ================= */
+/* =========================================================
+   LOGIN
+   ========================================================= */
 
 async function openLogin() {
 
@@ -354,11 +520,18 @@ async function openLogin() {
     </button>
   `);
 
-  $("loginForm").addEventListener(
-    "submit",
-    loginStudent
-  );
+  const form =
+    $("loginForm");
+
+  if (form) {
+
+    form.addEventListener(
+      "submit",
+      loginStudent
+    );
+  }
 }
+
 
 window.openLogin = openLogin;
 
@@ -396,7 +569,9 @@ async function loginStudent(event) {
 }
 
 
-/* ================= SIGNUP ================= */
+/* =========================================================
+   SIGNUP
+   ========================================================= */
 
 async function openSignup() {
 
@@ -453,11 +628,18 @@ async function openSignup() {
     </button>
   `);
 
-  $("signupForm").addEventListener(
-    "submit",
-    signupStudent
-  );
+  const form =
+    $("signupForm");
+
+  if (form) {
+
+    form.addEventListener(
+      "submit",
+      signupStudent
+    );
+  }
 }
+
 
 window.openSignup = openSignup;
 
@@ -483,8 +665,18 @@ async function signupStudent(event) {
 
   const { data, error } =
     await supabaseClient.auth.signUp({
+
       email,
-      password
+
+      password,
+
+      options: {
+        data: {
+          full_name: name,
+          student_id: studentId
+        }
+      }
+
     });
 
   if (error) {
@@ -503,36 +695,22 @@ async function signupStudent(event) {
     return;
   }
 
-  const { error: profileError } =
-    await supabaseClient
-      .from("profiles")
-      .insert({
-        id: data.user.id,
-        student_id: studentId,
-        full_name: name,
-        role: "student"
-      });
-
-  if (profileError) {
-
-    console.error(profileError);
-
-    $("authMessage").textContent =
-      "Auth account created, but profile creation failed.";
-
-    return;
-  }
-
   $("authMessage").textContent =
-    "Account created successfully.";
+    data.session
+      ? "Account created successfully."
+      : "Account created. Please check your email to confirm your account.";
 
   setTimeout(() => {
+
     openLogin();
-  }, 1000);
+
+  }, 1500);
 }
 
 
-/* ================= MEMBERSHIP ================= */
+/* =========================================================
+   MEMBERSHIP
+   ========================================================= */
 
 async function loadMembership() {
 
@@ -551,24 +729,39 @@ async function loadMembership() {
 
   if (error) {
 
-    console.error("Membership:", error);
+    console.error(
+      "Membership:",
+      error
+    );
+
     return;
   }
 
   if (!data) return;
 
-  $("studentPlan").textContent =
-    data.plan || "—";
+  if ($("studentPlan")) {
 
-  $("studentValidity").textContent =
-    data.end_date || "—";
+    $("studentPlan").textContent =
+      data.plan || "—";
+  }
 
-  $("paymentStatus").textContent =
-    data.payment_status || "—";
+  if ($("studentValidity")) {
+
+    $("studentValidity").textContent =
+      data.end_date || "—";
+  }
+
+  if ($("paymentStatus")) {
+
+    $("paymentStatus").textContent =
+      data.payment_status || "—";
+  }
 }
 
 
-/* ================= ATTENDANCE ================= */
+/* =========================================================
+   ATTENDANCE
+   ========================================================= */
 
 async function loadAttendance() {
 
@@ -586,7 +779,11 @@ async function loadAttendance() {
 
   if (error) {
 
-    console.error("Attendance:", error);
+    console.error(
+      "Attendance:",
+      error
+    );
+
     return;
   }
 
@@ -594,9 +791,14 @@ async function loadAttendance() {
 
   (data || []).forEach(record => {
 
-    if (!record.check_in) return;
+    if (!record.check_in) {
+      return;
+    }
 
-    if (record.duration_seconds) {
+    if (
+      record.duration_seconds !== null &&
+      record.duration_seconds !== undefined
+    ) {
 
       totalSeconds +=
         Number(record.duration_seconds);
@@ -604,7 +806,9 @@ async function loadAttendance() {
       return;
     }
 
-    if (!record.check_out) return;
+    if (!record.check_out) {
+      return;
+    }
 
     const start =
       new Date(record.check_in);
@@ -620,26 +824,31 @@ async function loadAttendance() {
   });
 
   const hours =
-    Math.floor(totalSeconds / 3600);
+    Math.floor(
+      totalSeconds / 3600
+    );
 
   const minutes =
     Math.floor(
       (totalSeconds % 3600) / 60
     );
 
-  $("studyTime").textContent =
-    `${hours}h ${minutes}m`;
+  if ($("studyTime")) {
+
+    $("studyTime").textContent =
+      `${hours}h ${minutes}m`;
+  }
 }
 
 
-/* ================= CHECK IN / OUT ================= */
+/* =========================================================
+   FIND CURRENT ATTENDANCE
+   ========================================================= */
 
-async function handleCheckButton() {
+async function getOpenAttendance() {
 
   if (!currentUser) {
-
-    openLogin();
-    return;
+    return null;
   }
 
   const { data, error } =
@@ -652,17 +861,37 @@ async function handleCheckButton() {
 
   if (error) {
 
-    showModal(`
-      <h2>Attendance Error</h2>
-      <p>${escapeHTML(error.message)}</p>
-    `);
+    console.error(
+      "Open attendance:",
+      error
+    );
+
+    return null;
+  }
+
+  return data || null;
+}
+
+
+/* =========================================================
+   CHECK BUTTON
+   ========================================================= */
+
+async function handleCheckButton() {
+
+  if (!currentUser) {
+
+    openLogin();
 
     return;
   }
 
-  if (data) {
+  const record =
+    await getOpenAttendance();
 
-    await checkoutStudent(data);
+  if (record) {
+
+    await checkoutStudent();
 
   } else {
 
@@ -671,21 +900,42 @@ async function handleCheckButton() {
 }
 
 
+/* =========================================================
+   SECURE CHECK IN
+   ========================================================= */
+
 async function checkinStudent() {
 
-  const { error } =
-    await supabaseClient
-      .from("attendance")
-      .insert({
-        student_id: currentUser.id,
-        check_in: new Date().toISOString()
-      });
+  showModal(`
+    <h2>Checking In...</h2>
+    <p>Please wait.</p>
+  `);
+
+  const { data, error } =
+    await supabaseClient.rpc(
+      "check_in_student"
+    );
 
   if (error) {
 
+    console.error(
+      "Check-in:",
+      error
+    );
+
     showModal(`
-      <h2>Check-in failed</h2>
-      <p>${escapeHTML(error.message)}</p>
+      <h2>❌ Check-in Failed</h2>
+
+      <p>
+        ${escapeHTML(error.message)}
+      </p>
+
+      <button
+        class="btn btn-outline full"
+        onclick="closeModal()"
+      >
+        Close
+      </button>
     `);
 
     return;
@@ -693,43 +943,125 @@ async function checkinStudent() {
 
   showModal(`
     <h2>✅ Checked In</h2>
-    <p>Your study session has started.</p>
+
+    <p>
+      Your study session has started.
+    </p>
+
+    <p>
+      <strong>Seat is now occupied.</strong>
+    </p>
+
+    <button
+      class="btn btn-primary full"
+      onclick="closeModal()"
+    >
+      Done
+    </button>
   `);
 
+  await loadSeats();
   await loadAttendance();
 }
 
 
-async function checkoutStudent(record) {
+/* =========================================================
+   SECURE CHECK OUT
+   ========================================================= */
 
-  const { error } =
-    await supabaseClient
-      .from("attendance")
-      .update({
-        check_out: new Date().toISOString()
-      })
-      .eq("id", record.id);
+async function checkoutStudent() {
+
+  showModal(`
+    <h2>Checking Out...</h2>
+    <p>Please wait.</p>
+  `);
+
+  const { data, error } =
+    await supabaseClient.rpc(
+      "check_out_student"
+    );
 
   if (error) {
 
+    console.error(
+      "Check-out:",
+      error
+    );
+
     showModal(`
-      <h2>Check-out failed</h2>
-      <p>${escapeHTML(error.message)}</p>
+      <h2>❌ Check-out Failed</h2>
+
+      <p>
+        ${escapeHTML(error.message)}
+      </p>
+
+      <button
+        class="btn btn-outline full"
+        onclick="closeModal()"
+      >
+        Close
+      </button>
     `);
 
     return;
   }
 
+  let durationText = "";
+
+  if (
+    data &&
+    data.duration_seconds !== null &&
+    data.duration_seconds !== undefined
+  ) {
+
+    const seconds =
+      Number(data.duration_seconds);
+
+    const hours =
+      Math.floor(seconds / 3600);
+
+    const minutes =
+      Math.floor(
+        (seconds % 3600) / 60
+      );
+
+    durationText =
+      `${hours}h ${minutes}m`;
+  }
+
   showModal(`
     <h2>✅ Checked Out</h2>
-    <p>Your study session has been recorded.</p>
+
+    <p>
+      Your study session has ended.
+    </p>
+
+    ${
+      durationText
+        ? `<p><strong>Session time: ${durationText}</strong></p>`
+        : ""
+    }
+
+    <p>
+      Your seat is now available.
+    </p>
+
+    <button
+      class="btn btn-primary full"
+      onclick="closeModal()"
+    >
+      Done
+    </button>
   `);
 
+  await loadSeats();
   await loadAttendance();
 }
 
 
-/* ================= NOTICES ================= */
+/* =========================================================
+   NOTICES
+   ========================================================= */
 
 async function loadNotices() {
 
@@ -745,40 +1077,59 @@ async function loadNotices() {
 
   if (error) {
 
-    console.error("Notices:", error);
+    console.error(
+      "Notices:",
+      error
+    );
+
     return;
   }
 
   if (!data || !data.length) {
 
-    $("noticeList").innerHTML = `
-      <div class="info-card">
-        <h3>No notices</h3>
-        <p>No library notices have been published.</p>
-      </div>
-    `;
+    if ($("noticeList")) {
+
+      $("noticeList").innerHTML = `
+        <div class="info-card">
+
+          <h3>No notices</h3>
+
+          <p>
+            No library notices have been published.
+          </p>
+
+        </div>
+      `;
+    }
 
     return;
   }
 
-  $("noticeList").innerHTML =
-    data.map(notice => `
-      <article class="notice-card">
+  if ($("noticeList")) {
 
-        <h3>
-          ${escapeHTML(notice.title)}
-        </h3>
+    $("noticeList").innerHTML =
+      data.map(notice => `
 
-        <p>
-          ${escapeHTML(notice.body)}
-        </p>
+        <article class="notice-card">
 
-      </article>
-    `).join("");
+          <h3>
+            ${escapeHTML(notice.title)}
+          </h3>
+
+          <p>
+            ${escapeHTML(notice.body)}
+          </p>
+
+        </article>
+
+      `).join("");
+  }
 }
 
 
-/* ================= QR ================= */
+/* =========================================================
+   QR
+   ========================================================= */
 
 function openQR() {
 
@@ -795,14 +1146,27 @@ function openQR() {
     </div>
 
     <p>
-      The final QR check-in/out flow will be connected
-      after the attendance security functions are added.
+      After login, the system will automatically
+      determine whether you need to check in or
+      check out.
     </p>
+
+    <button
+      class="btn btn-outline full"
+      onclick="closeModal()"
+    >
+      Close
+    </button>
   `);
 }
 
 
-/* ================= PLANS ================= */
+window.openQR = openQR;
+
+
+/* =========================================================
+   PLANS
+   ========================================================= */
 
 window.selectPlan = function(plan) {
 
@@ -824,7 +1188,9 @@ window.selectPlan = function(plan) {
 };
 
 
-/* ================= REALTIME ================= */
+/* =========================================================
+   REALTIME
+   ========================================================= */
 
 function startRealtime() {
 
@@ -839,6 +1205,7 @@ function startRealtime() {
         table: "seats"
       },
       () => {
+
         loadSeats();
       }
     )
@@ -851,86 +1218,5 @@ function startRealtime() {
         table: "attendance"
       },
       () => {
-        loadSeats();
 
-        if (currentUser) {
-          loadAttendance();
-        }
-      }
-    )
-
-    .subscribe();
-}
-
-
-/* ================= AUTH STATE ================= */
-
-supabaseClient.auth.onAuthStateChange(
-  async (_event, session) => {
-
-    currentUser =
-      session?.user || null;
-
-    if (currentUser) {
-      await loadProfile();
-    } else {
-      currentProfile = null;
-      updateDashboard();
-    }
-  }
-);
-
-
-/* ================= BUTTONS ================= */
-
-$("loginBtn")?.addEventListener(
-  "click",
-  openLogin
-);
-
-$("checkBtn")?.addEventListener(
-  "click",
-  handleCheckButton
-);
-
-$("qrBtn")?.addEventListener(
-  "click",
-  openQR
-);
-
-$("qrBtn2")?.addEventListener(
-  "click",
-  openQR
-);
-
-
-/* ================= YEAR ================= */
-
-if ($("year")) {
-  $("year").textContent =
-    new Date().getFullYear();
-}
-
-
-/* ================= START ================= */
-
-async function startApp() {
-
-  console.log(
-    "Study Point Library starting..."
-  );
-
-  await loadSeats();
-
-  await loadNotices();
-
-  await loadCurrentUser();
-
-  startRealtime();
-
-  console.log(
-    "Study Point Library connected to Supabase."
-  );
-}
-
-startApp();
+        loadSea
