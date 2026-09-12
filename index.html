@@ -1,22 +1,138 @@
 <!doctype html>
 <html lang="en">
 <head>
-<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Study Point Library</title>
 <meta name="description" content="Study Point Library student portal and seat management system">
-<link rel="manifest" href="manifest.json"><link rel="stylesheet" href="css/style.css">
+<link rel="manifest" href="manifest.json">
+<link rel="stylesheet" href="style.css">
 </head>
 <body>
-<header class="topbar"><a class="brand" href="#home"><span class="brand-mark">SP</span><span><b>Study Point</b><small>Library</small></span></a><nav><a href="#home">Home</a><a href="#seats">Seats</a><a href="#membership">Membership</a><a href="#notices">Notices</a><button id="loginBtn" class="btn btn-light">Student Login</button></nav></header>
+<header class="topbar">
+  <a class="brand" href="#home"><span class="brand-mark">SP</span><span><b>Study Point</b><small>Library</small></span></a>
+  <nav>
+    <a href="#home">Home</a>
+    <a href="#seats">Seats</a>
+    <a href="#membership">Membership</a>
+    <a href="#notices">Notices</a>
+    <button id="loginBtn" class="btn btn-light" type="button">Student Login</button>
+  </nav>
+</header>
+
 <main>
-<section id="home" class="hero"><div><span class="eyebrow">FOCUS • DISCIPLINE • RESULTS</span><h1>Your quiet place to <em>study better.</em></h1><p>Professional study seats, peaceful halls, Wi-Fi, AC and convenient attendance tracking.</p><div class="hero-actions"><a class="btn btn-primary" href="#seats">Book Your Seat</a><a class="btn btn-outline" href="#portal">My Membership</a></div><div class="open-pill">● Open 8:00 AM — 9:00 PM</div></div><div class="hero-card"><div class="live">LIVE SEAT AVAILABILITY</div><strong id="availableCount">70</strong><span>seats available</span><div class="mini-stats"><div><b>70</b><small>Total seats</small></div><div><b id="insideCount">0</b><small>Inside now</small></div></div></div></section>
-<section class="section"><div class="section-head"><div><span class="eyebrow">WHY STUDY POINT</span><h2>Everything you need for focused study.</h2></div></div><div class="facility-grid"><article><span>📶</span><h3>Free Wi-Fi</h3><p>Stay connected for learning and research.</p></article><article><span>❄️</span><h3>AC Study Halls</h3><p>Comfortable environment for long study sessions.</p></article><article><span>💧</span><h3>RO Water</h3><p>Clean drinking water available.</p></article><article><span>🔇</span><h3>Silent Environment</h3><p>A focused space designed for serious study.</p></article><article><span>🔌</span><h3>Power Facility</h3><p>Keep your study devices charged.</p></article><article><span>🔐</span><h3>Locker Facility</h3><p>Available for full-time members with refundable deposit.</p></article></div></section>
-<section id="seats" class="section dark-section"><div class="section-head"><div><span class="eyebrow">LIVE SEAT MAP</span><h2>Choose your seat</h2><p>🟢 Available &nbsp; 🔴 Occupied &nbsp; 🟡 Reserved</p></div><button class="btn btn-primary" id="qrBtn">Show Library QR</button></div><div id="seatMap"></div></section>
-<section id="membership" class="section"><div class="section-head"><div><span class="eyebrow">MEMBERSHIP</span><h2>Simple monthly plans</h2></div></div><div class="plans"><article><h3>Hall 1 · Full Time</h3><strong>₹1,100</strong><span>/ month</span><p>8 AM – 9 PM · A1–F5</p><button class="btn btn-primary" onclick="selectPlan('Hall 1 Full Time')">Choose</button></article><article><h3>Hall 2 · Full Time</h3><strong>₹1,100</strong><span>/ month</span><p>8 AM – 9 PM · Seats 1–40</p><button class="btn btn-primary" onclick="selectPlan('Hall 2 Full Time')">Choose</button></article><article><h3>Hall 2 · Morning</h3><strong>₹500</strong><span>/ month</span><p>8 AM – 2 PM</p><button class="btn btn-primary" onclick="selectPlan('Hall 2 Morning')">Choose</button></article><article><h3>Hall 2 · Evening</h3><strong>₹600</strong><span>/ month</span><p>2 PM – 9 PM</p><button class="btn btn-primary" onclick="selectPlan('Hall 2 Evening')">Choose</button></article></div><p class="locker-note">🔐 Locker: ₹200 one-time refundable deposit · Full-time members only.</p></section>
-<section id="portal" class="section portal-section"><div class="section-head"><div><span class="eyebrow">STUDENT PORTAL</span><h2>Attendance & membership</h2></div></div><div class="portal-grid"><div class="dashboard-card"><div class="avatar">MK</div><div><h3 id="studentName">Student</h3><p id="studentId">ID: —</p></div><span id="liveBadge" class="badge">Logged out</span><div class="dash-row"><span>Seat</span><b id="studentSeat">—</b></div><div class="dash-row"><span>Membership</span><b id="studentPlan">—</b></div><div class="dash-row"><span>Validity</span><b id="studentValidity">—</b></div><div class="dash-row"><span>Payment</span><b id="paymentStatus">—</b></div><div class="dash-row"><span>Study time today</span><b id="studyTime">0h 0m</b></div><button class="btn btn-primary full" id="checkBtn">Login to Check In</button></div><div class="info-card"><h3>One QR for IN / OUT</h3><p>Scan the permanent QR at the library entrance. The portal automatically shows the correct action based on your current status.</p><div class="qr-placeholder" id="qrPreview">QR</div><button class="btn btn-outline full" id="qrBtn2">Open QR</button></div></div></section>
-<section id="notices" class="section"><div class="section-head"><div><span class="eyebrow">NOTICE BOARD</span><h2>Latest library notices</h2></div></div><div id="noticeList" class="notices"></div></section>
-<section class="section rules"><div><span class="eyebrow">LIBRARY RULES</span><h2>Study respectfully.</h2><ul><li>Maintain silence inside study halls.</li><li>Check in and check out using the library QR.</li><li>Use only your assigned seat.</li><li>Keep your desk and common areas clean.</li><li>Follow library timings and staff instructions.</li></ul></div><div class="contact-card"><h3>Need help?</h3><p>Contact Study Point Library for membership, payment or seat assistance.</p><a class="btn btn-primary" href="https://wa.me/918000000000">WhatsApp</a><a class="btn btn-outline" target="_blank" href="https://maps.app.goo.gl/Hv8mywxtr8FYseVUA?g_st=ac">View Location</a></div></section>
-</main><footer><b>Study Point Library</b><span>8:00 AM – 9:00 PM</span><span>© <span id="year"></span></span></footer>
-<div id="modal" class="modal hidden"><div class="modal-box"><button class="close" onclick="closeModal()">×</button><div id="modalContent"></div></div></div>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script><script src="js/config.js"></script><script src="js/app.js"></script>
-</body></html>
+<section id="home" class="hero">
+  <div>
+    <span class="eyebrow">FOCUS • DISCIPLINE • RESULTS</span>
+    <h1>Your quiet place to <em>study better.</em></h1>
+    <p>Professional study seats, peaceful halls, Wi-Fi, AC and convenient attendance tracking.</p>
+    <div class="hero-actions">
+      <a class="btn btn-primary" href="#seats">Book Your Seat</a>
+      <a class="btn btn-outline" href="#portal">My Membership</a>
+    </div>
+    <div class="open-pill">● Open 8:00 AM — 9:00 PM</div>
+  </div>
+  <div class="hero-card">
+    <div class="live">LIVE SEAT AVAILABILITY</div>
+    <strong id="availableCount">70</strong>
+    <span>seats available</span>
+    <div class="mini-stats">
+      <div><b>70</b><small>Total seats</small></div>
+      <div><b id="insideCount">0</b><small>Inside now</small></div>
+    </div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="section-head"><div><span class="eyebrow">WHY STUDY POINT</span><h2>Everything you need for focused study.</h2></div></div>
+  <div class="facility-grid">
+    <article><span>📶</span><h3>Free Wi-Fi</h3><p>Stay connected for learning and research.</p></article>
+    <article><span>❄️</span><h3>AC Study Halls</h3><p>Comfortable environment for long study sessions.</p></article>
+    <article><span>💧</span><h3>RO Water</h3><p>Clean drinking water available.</p></article>
+    <article><span>🔇</span><h3>Silent Environment</h3><p>A focused space designed for serious study.</p></article>
+    <article><span>🔌</span><h3>Power Facility</h3><p>Keep your study devices charged.</p></article>
+    <article><span>🔐</span><h3>Locker Facility</h3><p>Available for full-time members with refundable deposit.</p></article>
+  </div>
+</section>
+
+<section id="seats" class="section dark-section">
+  <div class="section-head">
+    <div><span class="eyebrow">LIVE SEAT MAP</span><h2>Choose your seat</h2><p>🟢 Available &nbsp; 🔴 Occupied &nbsp; 🟡 Reserved</p></div>
+    <button class="btn btn-primary" id="qrBtn" type="button">Show Library QR</button>
+  </div>
+  <div id="seatMap"></div>
+</section>
+
+<section id="membership" class="section">
+  <div class="section-head"><div><span class="eyebrow">MEMBERSHIP</span><h2>Simple monthly plans</h2></div></div>
+  <div class="plans">
+    <article><h3>Hall 1 · Full Time</h3><strong>₹1,100</strong><span>/ month</span><p>8 AM – 9 PM · A1–F5</p><button class="btn btn-primary" type="button" onclick="selectPlan('Hall 1 Full Time')">Choose</button></article>
+    <article><h3>Hall 2 · Full Time</h3><strong>₹1,100</strong><span>/ month</span><p>8 AM – 9 PM · Seats 1–40</p><button class="btn btn-primary" type="button" onclick="selectPlan('Hall 2 Full Time')">Choose</button></article>
+    <article><h3>Hall 2 · Morning</h3><strong>₹500</strong><span>/ month</span><p>8 AM – 2 PM</p><button class="btn btn-primary" type="button" onclick="selectPlan('Hall 2 Morning')">Choose</button></article>
+    <article><h3>Hall 2 · Evening</h3><strong>₹600</strong><span>/ month</span><p>2 PM – 9 PM</p><button class="btn btn-primary" type="button" onclick="selectPlan('Hall 2 Evening')">Choose</button></article>
+  </div>
+  <p class="locker-note">🔐 Locker: ₹200 one-time refundable deposit · Full-time members only.</p>
+</section>
+
+<section id="portal" class="section portal-section">
+  <div class="section-head"><div><span class="eyebrow">STUDENT PORTAL</span><h2>Attendance & membership</h2></div></div>
+  <div class="portal-grid">
+    <div class="dashboard-card">
+      <div class="avatar">MK</div>
+      <div><h3 id="studentName">Student</h3><p id="studentId">ID: —</p></div>
+      <span id="liveBadge" class="badge">Logged out</span>
+      <div class="dash-row"><span>Seat</span><b id="studentSeat">—</b></div>
+      <div class="dash-row"><span>Membership</span><b id="studentPlan">—</b></div>
+      <div class="dash-row"><span>Validity</span><b id="studentValidity">—</b></div>
+      <div class="dash-row"><span>Payment</span><b id="paymentStatus">—</b></div>
+      <div class="dash-row"><span>Study time today</span><b id="studyTime">0h 0m</b></div>
+      <button class="btn btn-primary full" id="checkBtn" type="button">Login to Check In</button>
+    </div>
+    <div class="info-card">
+      <h3>One QR for IN / OUT</h3>
+      <p>Scan the permanent QR at the library entrance. The portal automatically shows the correct action based on your current status.</p>
+      <div class="qr-placeholder" id="qrPreview">QR</div>
+      <button class="btn btn-outline full" id="qrBtn2" type="button">Open QR</button>
+    </div>
+  </div>
+</section>
+
+<section id="notices" class="section">
+  <div class="section-head"><div><span class="eyebrow">NOTICE BOARD</span><h2>Latest library notices</h2></div></div>
+  <div id="noticeList" class="notices"></div>
+</section>
+
+<section class="section rules">
+  <div><span class="eyebrow">LIBRARY RULES</span><h2>Study respectfully.</h2>
+    <ul>
+      <li>Maintain silence inside study halls.</li>
+      <li>Check in and check out using the library QR.</li>
+      <li>Use only your assigned seat.</li>
+      <li>Keep your desk and common areas clean.</li>
+      <li>Follow library timings and staff instructions.</li>
+    </ul>
+  </div>
+  <div class="contact-card">
+    <h3>Need help?</h3><p>Contact Study Point Library for membership, payment or seat assistance.</p>
+    <a class="btn btn-primary" href="https://wa.me/918000000000">WhatsApp</a>
+    <a class="btn btn-outline" target="_blank" rel="noopener" href="https://maps.app.goo.gl/Hv8mywxtr8FYseVUA?g_st=ac">View Location</a>
+  </div>
+</section>
+</main>
+
+<footer><b>Study Point Library</b><span>8:00 AM – 9:00 PM</span><span>© <span id="year"></span></span></footer>
+
+<div id="modal" class="modal hidden" aria-hidden="true">
+  <div class="modal-box" role="dialog" aria-modal="true">
+    <button class="close" type="button" onclick="closeModal()" aria-label="Close">×</button>
+    <div id="modalContent"></div>
+  </div>
+</div>
+
+<!-- Keep these files in the SAME folder as index.html on GitHub/Netlify. -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="config.js"></script>
+<script src="app.js"></script>
+</body>
+    </html>
+    
