@@ -1,0 +1,378 @@
+<!DOCTYPE html>
+
+<html lang="en">
+
+<head>
+
+<meta charset="UTF-8">
+
+<meta
+  name="viewport"
+  content="width=device-width, initial-scale=1.0">
+
+<title>
+  Study Point Library - Admin
+</title>
+
+<link
+  rel="stylesheet"
+  href="css/style.css">
+
+</head>
+
+
+<body>
+
+
+<header class="topbar">
+
+  <a href="index.html">
+    Study Point Library
+  </a>
+
+  <button
+    id="adminLogout"
+    class="btn btn-light">
+
+    Logout
+
+  </button>
+
+</header>
+
+
+<main>
+
+<section class="section">
+
+<h1>
+  Admin Panel
+</h1>
+
+<p>
+  Create student login accounts.
+</p>
+
+
+<div class="dashboard-card">
+
+
+<h2>
+  Create Student
+</h2>
+
+
+<form id="createStudentForm">
+
+
+<label>
+  Student Full Name
+</label>
+
+<input
+  id="fullName"
+  type="text"
+  placeholder="Student name"
+  required>
+
+
+<label>
+  Student ID / Phone Number
+</label>
+
+<input
+  id="studentId"
+  type="tel"
+  inputmode="numeric"
+  placeholder="9876543210"
+  required>
+
+
+<label>
+  Password
+</label>
+
+<input
+  id="password"
+  type="text"
+  value="12345678"
+  minlength="8"
+  required>
+
+
+<button
+  class="btn btn-primary"
+  type="submit">
+
+  Create Student
+
+</button>
+
+
+</form>
+
+
+<div id="createResult"></div>
+
+
+</div>
+
+</section>
+
+</main>
+
+
+<script
+  src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2">
+</script>
+
+<script src="js/config.js"></script>
+
+
+<script>
+
+const sb =
+  supabase.createClient(
+    window.SPL_CONFIG.SUPABASE_URL,
+    window.SPL_CONFIG.SUPABASE_KEY
+  );
+
+
+async function checkAdmin() {
+
+  const {
+    data: {
+      session
+    }
+  } =
+    await sb.auth.getSession();
+
+
+  if (!session) {
+
+    document.getElementById(
+      "createResult"
+    ).innerHTML =
+      "<p>Please login as admin first.</p>";
+
+    return false;
+
+  }
+
+
+  const {
+    data: profile
+  } =
+    await sb
+      .from("profiles")
+      .select("role")
+      .eq("id", session.user.id)
+      .single();
+
+
+  if (
+    !profile ||
+    profile.role !== "admin"
+  ) {
+
+    document.getElementById(
+      "createResult"
+    ).innerHTML =
+      "<p>Admin access required.</p>";
+
+    return false;
+
+  }
+
+
+  return true;
+
+}
+
+
+document
+  .getElementById("createStudentForm")
+  .addEventListener(
+    "submit",
+    async function(event) {
+
+      event.preventDefault();
+
+
+      const result =
+        document.getElementById(
+          "createResult"
+        );
+
+
+      result.innerHTML =
+        "<p>Creating student...</p>";
+
+
+      const {
+        data: {
+          session
+        }
+      } =
+        await sb.auth.getSession();
+
+
+      if (!session) {
+
+        result.innerHTML =
+          "<p>Please login again.</p>";
+
+        return;
+
+      }
+
+
+      const response =
+        await fetch(
+          "/.netlify/functions/create-student",
+          {
+
+            method: "POST",
+
+            headers: {
+
+              "Content-Type":
+                "application/json",
+
+              "Authorization":
+                "Bearer " +
+                session.access_token
+
+            },
+
+
+            body:
+              JSON.stringify({
+
+                full_name:
+                  document
+                    .getElementById(
+                      "fullName"
+                    )
+                    .value
+                    .trim(),
+
+                student_id:
+                  document
+                    .getElementById(
+                      "studentId"
+                    )
+                    .value
+                    .trim(),
+
+                phone:
+                  document
+                    .getElementById(
+                      "studentId"
+                    )
+                    .value
+                    .trim(),
+
+                password:
+                  document
+                    .getElementById(
+                      "password"
+                    )
+                    .value
+
+              })
+
+          }
+        );
+
+
+      const data =
+        await response
+          .json()
+          .catch(
+            () => ({})
+          );
+
+
+      if (!response.ok) {
+
+        result.innerHTML =
+          "<p>Error: " +
+          (
+            data.error ||
+            "Could not create student."
+          ) +
+          "</p>";
+
+        return;
+
+      }
+
+
+      result.innerHTML = `
+
+        <div>
+
+          <h3>
+            Student Created Successfully
+          </h3>
+
+          <p>
+            <b>Student ID:</b>
+            ${data.student.student_id}
+          </p>
+
+          <p>
+            <b>Password:</b>
+            ${document
+              .getElementById("password")
+              .value}
+          </p>
+
+          <p>
+            Give these login details to the student.
+          </p>
+
+        </div>
+
+      `;
+
+
+      document
+        .getElementById(
+          "createStudentForm"
+        )
+        .reset();
+
+
+      document
+        .getElementById(
+          "password"
+        )
+        .value =
+        "12345678";
+
+    });
+
+
+document
+  .getElementById("adminLogout")
+  .onclick =
+  async function() {
+
+    await sb.auth.signOut();
+
+    location.href =
+      "index.html";
+
+  };
+
+
+checkAdmin();
+
+</script>
+
+
+</body>
+
+</html>
