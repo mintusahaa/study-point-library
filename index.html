@@ -1,50 +1,89 @@
 <!doctype html>
 <html lang="en">
+
 <head>
+
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width,initial-scale=1">
+
+  <meta
+    name="viewport"
+    content="width=device-width,initial-scale=1"
+  >
 
   <title>Study Point Library</title>
 
   <meta
     name="description"
-    content="Study Point Library — student portal, live seat booking, attendance and membership management."
+    content="Study Point Library student portal, seat booking and attendance system."
   >
 
-  <meta name="theme-color" content="#111827">
+  <meta
+    name="theme-color"
+    content="#111827"
+  >
 
-  <link rel="manifest" href="manifest.json">
-  <link rel="stylesheet" href="css/style.css">
+  <link
+    rel="manifest"
+    href="manifest.json"
+  >
+
+  <link
+    rel="stylesheet"
+    href="css/style.css"
+  >
+
 </head>
+
 
 <body>
 
-<!-- =========================
-     TOP NAVIGATION
-========================= -->
+
+<!-- =====================================================
+     HEADER
+===================================================== -->
 
 <header class="topbar">
 
-  <a class="brand" href="#home" aria-label="Study Point Library Home">
+  <a
+    class="brand"
+    href="#home"
+  >
 
-    <span class="brand-mark">SP</span>
+    <span class="brand-mark">
+      SP
+    </span>
 
     <span>
+
       <b>Study Point</b>
+
       <small>Library</small>
+
     </span>
 
   </a>
 
-  <nav aria-label="Main navigation">
 
-    <a href="#home">Home</a>
+  <nav>
 
-    <a href="#seats">Seats</a>
+    <a href="#home">
+      Home
+    </a>
 
-    <a href="#membership">Membership</a>
+    <a href="#seats">
+      Seats
+    </a>
 
-    <a href="#notices">Notices</a>
+    <a href="#membership">
+      Membership
+    </a>
+
+    <a href="#notices">
+      Notices
+    </a>
+
+
+    <!-- ONLY LOGIN BUTTON -->
 
     <button
       id="loginBtn"
@@ -59,13 +98,18 @@
 </header>
 
 
+
 <main>
 
-<!-- =========================
-     HOME / HERO
-========================= -->
 
-<section id="home" class="hero">
+<!-- =====================================================
+     HERO
+===================================================== -->
+
+<section
+  id="home"
+  class="hero"
+>
 
   <div>
 
@@ -73,16 +117,19 @@
       FOCUS • DISCIPLINE • RESULTS
     </span>
 
+
     <h1>
       Your quiet place to
       <em>study better.</em>
     </h1>
+
 
     <p>
       A peaceful and professional study environment
       with comfortable seats, AC, Wi-Fi and
       digital attendance tracking.
     </p>
+
 
     <div class="hero-actions">
 
@@ -93,6 +140,7 @@
         Book Your Seat
       </a>
 
+
       <a
         class="btn btn-outline"
         href="#portal"
@@ -102,11 +150,13 @@
 
     </div>
 
+
     <div class="open-pill">
       ● Open 8:00 AM — 9:00 PM
     </div>
 
   </div>
+
 
 
   <div class="hero-card">
@@ -115,24 +165,42 @@
       LIVE SEAT AVAILABILITY
     </div>
 
+
     <strong id="availableCount">
-      —
+      70
     </strong>
+
 
     <span>
       seats available
     </span>
 
+
     <div class="mini-stats">
 
       <div>
-        <b>70</b>
-        <small>Total seats</small>
+
+        <b id="totalSeatCount">
+          70
+        </b>
+
+        <small>
+          Total seats
+        </small>
+
       </div>
 
+
       <div>
-        <b id="insideCount">0</b>
-        <small>Inside now</small>
+
+        <b id="insideCount">
+          0
+        </b>
+
+        <small>
+          Inside now
+        </small>
+
       </div>
 
     </div>
@@ -142,9 +210,10 @@
 </section>
 
 
-<!-- =========================
+
+<!-- =====================================================
      FACILITIES
-========================= -->
+===================================================== -->
 
 <section class="section">
 
@@ -167,63 +236,98 @@
 
   <div class="facility-grid">
 
+
     <article>
+
       <span>📶</span>
-      <h3>Free Wi-Fi</h3>
+
+      <h3>
+        Free Wi-Fi
+      </h3>
+
       <p>
         Stay connected for learning,
         classes and research.
       </p>
+
     </article>
 
 
     <article>
+
       <span>❄️</span>
-      <h3>AC Study Halls</h3>
+
+      <h3>
+        AC Study Halls
+      </h3>
+
       <p>
         Comfortable environment for
         long study sessions.
       </p>
+
     </article>
 
 
     <article>
+
       <span>💧</span>
-      <h3>RO Water</h3>
+
+      <h3>
+        RO Water
+      </h3>
+
       <p>
-        Clean drinking water available
-        for members.
+        Clean drinking water available.
       </p>
+
     </article>
 
 
     <article>
+
       <span>🔇</span>
-      <h3>Silent Environment</h3>
+
+      <h3>
+        Silent Environment
+      </h3>
+
       <p>
         A focused space designed for
         serious study.
       </p>
+
     </article>
 
 
     <article>
+
       <span>🔌</span>
-      <h3>Power Facility</h3>
+
+      <h3>
+        Power Facility
+      </h3>
+
       <p>
-        Keep your study devices
-        charged during your session.
+        Keep your study devices charged.
       </p>
+
     </article>
 
 
     <article>
+
       <span>🔐</span>
-      <h3>Locker Facility</h3>
+
+      <h3>
+        Locker Facility
+      </h3>
+
       <p>
         Available for full-time members
         with refundable deposit.
       </p>
+
     </article>
 
   </div>
@@ -231,14 +335,16 @@
 </section>
 
 
-<!-- =========================
-     LIVE SEAT MAP
-========================= -->
+
+<!-- =====================================================
+     SEATS
+===================================================== -->
 
 <section
   id="seats"
   class="section dark-section"
 >
+
 
   <div class="section-head">
 
@@ -248,9 +354,11 @@
         LIVE SEAT MAP
       </span>
 
+
       <h2>
         Choose your seat
       </h2>
+
 
       <p>
         🟢 Available
@@ -274,26 +382,37 @@
   </div>
 
 
+  <!--
+    IMPORTANT:
+    NO EXTRA STUDENT LOGIN BUTTON HERE.
+  -->
+
   <div id="seatMap">
 
-    <div class="info-card">
+    <div class="seat-hall">
 
       <h3>
-        Student Login Required
+        Hall 1 · Full Time · A1–F5
       </h3>
 
-      <p>
-        Login to see live seat availability
-        and reserve your seat.
-      </p>
+      <div class="seat-grid">
 
-      <button
-        class="btn btn-primary"
-        type="button"
-        onclick="openLoginModal()"
-      >
-        Student Login
-      </button>
+        <button class="seat available">
+          A1
+          <small>Available</small>
+        </button>
+
+        <button class="seat available">
+          A2
+          <small>Available</small>
+        </button>
+
+        <button class="seat available">
+          A3
+          <small>Available</small>
+        </button>
+
+      </div>
 
     </div>
 
@@ -302,14 +421,16 @@
 </section>
 
 
-<!-- =========================
-     MEMBERSHIP PLANS
-========================= -->
+
+<!-- =====================================================
+     MEMBERSHIP
+===================================================== -->
 
 <section
   id="membership"
   class="section"
 >
+
 
   <div class="section-head">
 
@@ -318,6 +439,7 @@
       <span class="eyebrow">
         MEMBERSHIP
       </span>
+
 
       <h2>
         Simple monthly plans
@@ -330,8 +452,6 @@
 
   <div class="plans">
 
-
-    <!-- HALL 1 FULL -->
 
     <article>
 
@@ -352,9 +472,9 @@
       </p>
 
       <button
-        class="btn btn-primary"
+        class="btn btn-primary planBtn"
+        data-plan="Hall 1 Full Time"
         type="button"
-        onclick="selectPlan('Hall 1 Full Time')"
       >
         Choose
       </button>
@@ -362,7 +482,6 @@
     </article>
 
 
-    <!-- HALL 2 FULL -->
 
     <article>
 
@@ -383,9 +502,9 @@
       </p>
 
       <button
-        class="btn btn-primary"
+        class="btn btn-primary planBtn"
+        data-plan="Hall 2 Full Time"
         type="button"
-        onclick="selectPlan('Hall 2 Full Time')"
       >
         Choose
       </button>
@@ -393,7 +512,6 @@
     </article>
 
 
-    <!-- HALL 2 MORNING -->
 
     <article>
 
@@ -414,9 +532,9 @@
       </p>
 
       <button
-        class="btn btn-primary"
+        class="btn btn-primary planBtn"
+        data-plan="Hall 2 Morning"
         type="button"
-        onclick="selectPlan('Hall 2 Morning')"
       >
         Choose
       </button>
@@ -424,7 +542,6 @@
     </article>
 
 
-    <!-- HALL 2 EVENING -->
 
     <article>
 
@@ -445,9 +562,9 @@
       </p>
 
       <button
-        class="btn btn-primary"
+        class="btn btn-primary planBtn"
+        data-plan="Hall 2 Evening"
         type="button"
-        onclick="selectPlan('Hall 2 Evening')"
       >
         Choose
       </button>
@@ -468,14 +585,16 @@
 </section>
 
 
-<!-- =========================
+
+<!-- =====================================================
      STUDENT PORTAL
-========================= -->
+===================================================== -->
 
 <section
   id="portal"
   class="section portal-section"
 >
+
 
   <div class="section-head">
 
@@ -484,6 +603,7 @@
       <span class="eyebrow">
         STUDENT PORTAL
       </span>
+
 
       <h2>
         Attendance & membership
@@ -494,12 +614,14 @@
   </div>
 
 
+
   <div class="portal-grid">
 
 
-    <!-- STUDENT DASHBOARD -->
+    <!-- DASHBOARD -->
 
     <div class="dashboard-card">
+
 
       <div class="avatar">
         ST
@@ -511,6 +633,7 @@
         <h3 id="studentName">
           Student
         </h3>
+
 
         <p id="studentId">
           ID: —
@@ -600,22 +723,26 @@
         Login to Check In
       </button>
 
+
     </div>
 
 
-    <!-- QR INFORMATION -->
+
+    <!-- QR -->
 
     <div class="info-card">
+
 
       <h3>
         One QR for IN / OUT
       </h3>
 
+
       <p>
         Scan the permanent QR at the
-        library entrance. After login,
-        the portal automatically shows
-        the correct attendance action.
+        library entrance. Login and
+        use the same QR for both
+        CHECK IN and CHECK OUT.
       </p>
 
 
@@ -635,6 +762,7 @@
         Open QR
       </button>
 
+
     </div>
 
   </div>
@@ -642,14 +770,16 @@
 </section>
 
 
-<!-- =========================
+
+<!-- =====================================================
      NOTICES
-========================= -->
+===================================================== -->
 
 <section
   id="notices"
   class="section"
 >
+
 
   <div class="section-head">
 
@@ -658,6 +788,7 @@
       <span class="eyebrow">
         NOTICE BOARD
       </span>
+
 
       <h2>
         Latest library notices
@@ -690,17 +821,20 @@
 </section>
 
 
-<!-- =========================
-     LIBRARY RULES
-========================= -->
+
+<!-- =====================================================
+     RULES + CONTACT
+===================================================== -->
 
 <section class="section rules">
+
 
   <div>
 
     <span class="eyebrow">
       LIBRARY RULES
     </span>
+
 
     <h2>
       Study respectfully.
@@ -736,11 +870,13 @@
   </div>
 
 
+
   <div class="contact-card">
 
     <h3>
       Need help?
     </h3>
+
 
     <p>
       Contact Study Point Library for
@@ -760,9 +896,9 @@
 
     <a
       class="btn btn-outline"
+      href="https://maps.app.goo.gl/Hv8mywxtr8FYseVUA?g_st=ac"
       target="_blank"
       rel="noopener"
-      href="https://maps.app.goo.gl/Hv8mywxtr8FYseVUA?g_st=ac"
     >
       View Location
     </a>
@@ -771,12 +907,14 @@
 
 </section>
 
+
 </main>
 
 
-<!-- =========================
+
+<!-- =====================================================
      FOOTER
-========================= -->
+===================================================== -->
 
 <footer>
 
@@ -795,28 +933,28 @@
 </footer>
 
 
-<!-- =========================
+
+<!-- =====================================================
      MODAL
-========================= -->
+===================================================== -->
 
 <div
   id="modal"
   class="modal hidden"
   role="dialog"
   aria-modal="true"
-  aria-labelledby="modalContent"
 >
 
   <div class="modal-box">
 
     <button
       class="close"
+      id="closeModalBtn"
       type="button"
-      aria-label="Close"
-      onclick="closeModal()"
     >
       ×
     </button>
+
 
     <div id="modalContent"></div>
 
@@ -825,17 +963,579 @@
 </div>
 
 
-<!-- =========================
-     SCRIPTS
-========================= -->
+
+<!-- =====================================================
+     SUPABASE
+===================================================== -->
 
 <script
   src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"
 ></script>
 
+
+<!-- YOUR EXISTING CONFIG FILE -->
+
 <script src="js/config.js"></script>
 
-<script src="js/app.js"></script>
 
-</body>
-</html>
+
+<!-- =====================================================
+     ALL JAVASCRIPT IS NOW INSIDE INDEX.HTML
+===================================================== -->
+
+<script>
+
+"use strict";
+
+
+/* =====================================================
+   GLOBAL VARIABLES
+===================================================== */
+
+let supabaseClient = null;
+
+let currentUser = null;
+
+let currentProfile = null;
+
+let seats = [];
+
+let currentAttendance = null;
+
+let currentMembership = null;
+
+
+
+/* =====================================================
+   BASIC HELPERS
+===================================================== */
+
+function $(id) {
+
+  return document.getElementById(id);
+
+}
+
+
+
+function escapeHTML(value) {
+
+  return String(value ?? "")
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll('"', "&quot;")
+    .replaceAll("'", "&#039;");
+
+}
+
+
+
+function showModal(html) {
+
+  $("modalContent").innerHTML = html;
+
+  $("modal").classList.remove("hidden");
+
+}
+
+
+
+function closeModal() {
+
+  $("modal").classList.add("hidden");
+
+}
+
+
+window.closeModal = closeModal;
+
+
+
+function alertMessage(
+  message,
+  title = "Study Point Library"
+) {
+
+  showModal(`
+
+    <h2>${escapeHTML(title)}</h2>
+
+    <p>
+      ${escapeHTML(message)}
+    </p>
+
+    <button
+      class="btn btn-primary full"
+      onclick="closeModal()"
+    >
+      OK
+    </button>
+
+  `);
+
+}
+
+
+
+/* =====================================================
+   INITIALIZE SUPABASE
+===================================================== */
+
+function initializeSupabase() {
+
+  const config =
+    window.SPL_CONFIG || {};
+
+
+  if (
+    !window.supabase
+  ) {
+
+    alertMessage(
+      "Supabase library could not load. Please check your internet connection.",
+      "Supabase Error"
+    );
+
+    return false;
+
+  }
+
+
+  if (
+    !config.SUPABASE_URL ||
+    !config.SUPABASE_KEY
+  ) {
+
+    alertMessage(
+      "Supabase configuration is missing. Please check js/config.js.",
+      "Configuration Error"
+    );
+
+    return false;
+
+  }
+
+
+  try {
+
+    supabaseClient =
+      window.supabase.createClient(
+        config.SUPABASE_URL,
+        config.SUPABASE_KEY
+      );
+
+
+    console.log(
+      "✅ Supabase initialized"
+    );
+
+
+    return true;
+
+  } catch (error) {
+
+    console.error(error);
+
+
+    alertMessage(
+      "Supabase could not be initialized.",
+      "Supabase Error"
+    );
+
+
+    return false;
+
+  }
+
+}
+
+
+
+/* =====================================================
+   LOGIN MODAL
+===================================================== */
+
+function openLoginModal(
+  message = ""
+) {
+
+  showModal(`
+
+    <h2>
+      Student Login
+    </h2>
+
+
+    ${
+      message
+        ? `
+          <p>
+            <b>
+              ${escapeHTML(message)}
+            </b>
+          </p>
+        `
+        : ""
+    }
+
+
+    <form id="loginForm">
+
+      <label>
+        Email
+      </label>
+
+
+      <input
+        id="loginEmail"
+        type="email"
+        required
+        placeholder="Enter your email"
+        style="
+          width:100%;
+          padding:12px;
+          margin:6px 0 14px;
+        "
+      >
+
+
+      <label>
+        Password
+      </label>
+
+
+      <input
+        id="loginPassword"
+        type="password"
+        required
+        placeholder="Enter password"
+        style="
+          width:100%;
+          padding:12px;
+          margin:6px 0 16px;
+        "
+      >
+
+
+      <button
+        class="btn btn-primary full"
+        type="submit"
+      >
+        Login
+      </button>
+
+
+    </form>
+
+
+    <p style="margin-top:16px">
+      Don't have an account?
+    </p>
+
+
+    <button
+      class="btn btn-outline full"
+      id="signupOpenBtn"
+      type="button"
+    >
+      Create Student Account
+    </button>
+
+  `);
+
+
+  $("signupOpenBtn")
+    ?.addEventListener(
+      "click",
+      openSignupModal
+    );
+
+
+  $("loginForm")
+    ?.addEventListener(
+      "submit",
+      loginStudent
+    );
+
+}
+
+
+window.openLoginModal =
+  openLoginModal;
+
+
+
+/* =====================================================
+   LOGIN
+===================================================== */
+
+async function loginStudent(event) {
+
+  event.preventDefault();
+
+
+  if (!supabaseClient) {
+
+    alertMessage(
+      "Supabase is not connected.",
+      "Connection Error"
+    );
+
+    return;
+
+  }
+
+
+  const email =
+    $("loginEmail")
+      .value
+      .trim();
+
+
+  const password =
+    $("loginPassword")
+      .value;
+
+
+  try {
+
+    const result =
+      await supabaseClient.auth
+        .signInWithPassword({
+          email,
+          password
+        });
+
+
+    if (result.error)
+      throw result.error;
+
+
+    closeModal();
+
+
+    await loadUser();
+
+
+    alertMessage(
+      "You have successfully logged in.",
+      "Welcome"
+    );
+
+
+  } catch (error) {
+
+    console.error(error);
+
+
+    alertMessage(
+      error.message ||
+      "Login failed. Please check your email and password.",
+      "Login Failed"
+    );
+
+  }
+
+}
+
+
+
+/* =====================================================
+   SIGNUP
+===================================================== */
+
+function openSignupModal() {
+
+  showModal(`
+
+    <h2>
+      Create Student Account
+    </h2>
+
+
+    <form id="signupForm">
+
+
+      <label>
+        Full Name
+      </label>
+
+
+      <input
+        id="signupName"
+        type="text"
+        required
+        placeholder="Full name"
+        style="
+          width:100%;
+          padding:12px;
+          margin:6px 0 12px;
+        "
+      >
+
+
+      <label>
+        Student ID
+      </label>
+
+
+      <input
+        id="signupStudentId"
+        type="text"
+        placeholder="Student ID"
+        style="
+          width:100%;
+          padding:12px;
+          margin:6px 0 12px;
+        "
+      >
+
+
+      <label>
+        Phone
+      </label>
+
+
+      <input
+        id="signupPhone"
+        type="tel"
+        placeholder="Phone number"
+        style="
+          width:100%;
+          padding:12px;
+          margin:6px 0 12px;
+        "
+      >
+
+
+      <label>
+        Email
+      </label>
+
+
+      <input
+        id="signupEmail"
+        type="email"
+        required
+        placeholder="Email"
+        style="
+          width:100%;
+          padding:12px;
+          margin:6px 0 12px;
+        "
+      >
+
+
+      <label>
+        Password
+      </label>
+
+
+      <input
+        id="signupPassword"
+        type="password"
+        minlength="6"
+        required
+        placeholder="Minimum 6 characters"
+        style="
+          width:100%;
+          padding:12px;
+          margin:6px 0 16px;
+        "
+      >
+
+
+      <button
+        class="btn btn-primary full"
+        type="submit"
+      >
+        Create Account
+      </button>
+
+
+    </form>
+
+
+    <button
+      class="btn btn-outline full"
+      id="backLoginBtn"
+      type="button"
+      style="margin-top:10px"
+    >
+      Back to Login
+    </button>
+
+  `);
+
+
+  $("signupForm")
+    ?.addEventListener(
+      "submit",
+      signupStudent
+    );
+
+
+  $("backLoginBtn")
+    ?.addEventListener(
+      "click",
+      () => openLoginModal()
+    );
+
+}
+
+
+window.openSignupModal =
+  openSignupModal;
+
+
+
+async function signupStudent(event) {
+
+  event.preventDefault();
+
+
+  try {
+
+    const name =
+      $("signupName")
+        .value
+        .trim();
+
+
+    const studentId =
+      $("signupStudentId")
+        .value
+        .trim();
+
+
+    const phone =
+      $("signupPhone")
+        .value
+        .trim();
+
+
+    const email =
+      $("signupEmail")
+        .value
+        .trim();
+
+
+    const password =
+      $("signupPassword")
+        .value;
+
+
+    const result =
+      await supabaseClient.auth
+        .signUp({
+
+          email,
+
+          password,
+
+          options: {
+
+            data: {
+
+       
