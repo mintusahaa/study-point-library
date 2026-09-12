@@ -1,7 +1,6 @@
 /* =========================================================
    STUDY POINT LIBRARY
-   Supabase-connected frontend
-   File: js/app.js
+   Supabase Frontend
    ========================================================= */
 
 const { createClient } = window.supabase;
@@ -11,12 +10,23 @@ const supabaseClient = createClient(
   SPL_CONFIG.SUPABASE_KEY
 );
 
+let currentUser = null;
+let currentProfile = null;
+let allSeats = [];
 
-/* =========================================================
-   BASIC HELPERS
-   ========================================================= */
+
+/* ================= HELPERS ================= */
 
 const $ = (id) => document.getElementById(id);
+
+function escapeHTML(value) {
+  return String(value ?? "")
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll('"', "&quot;")
+    .replaceAll("'", "&#039;");
+}
 
 function showModal(html) {
   $("modalContent").innerHTML = html;
@@ -29,21 +39,8 @@ function closeModal() {
 
 window.closeModal = closeModal;
 
-function escapeHTML(value) {
-  return String(value ?? "")
-    .replaceAll("&", "&amp;")
-    .replaceAll("<", "&lt;")
-    .replaceAll(">", "&gt;")
-    .replaceAll('"', "&quot;")
-    .replaceAll("'", "&#039;");
-}
 
-
-/* =========================================================
-   SEATS
-   ========================================================= */
-
-let allSeats = [];
+/* ================= SEATS ================= */
 
 async function loadSeats() {
 
@@ -54,13 +51,15 @@ async function loadSeats() {
     .order("seat_number");
 
   if (error) {
-    console.error("Seat loading error:", error);
+    console.error(error);
+
     $("seatMap").innerHTML = `
       <div class="info-card">
-        <h3>Unable to load live seats</h3>
-        <p>Please check your Supabase connection and database permissions.</p>
+        <h3>Unable to load seats</h3>
+        <p>${escapeHTML(error.message)}</p>
       </div>
     `;
+
     return;
   }
 
@@ -73,86 +72,76 @@ async function loadSeats() {
 
 function renderSeats() {
 
-  const seatMap = $("seatMap");
+  const map = $("seatMap");
 
   if (!allSeats.length) {
-    seatMap.innerHTML = `
+    map.innerHTML = `
       <div class="info-card">
         <h3>No seats found</h3>
-        <p>Please check the seats table in Supabase.</p>
+        <p>Please check your Supabase seats table.</p>
       </div>
     `;
     return;
   }
 
-  const halls = {};
+  const hall1 = allSeats.filter(
+    seat => seat.hall === "Hall 1"
+  );
 
-  allSeats.forEach(seat => {
+  const hall2 = allSeats.filter(
+    seat => seat.hall === "Hall 2"
+  );
 
-    const hallName = seat.hall || "Library";
-
-    if (!halls[hallName]) {
-      halls[hallName] = [];
-    }
-
-    halls[hallName].push(seat);
-  });
+  map.innerHTML = `
+    ${renderHall("Hall 1", hall1)}
+    ${renderHall("Hall 2", hall2)}
+  `;
+}
 
 
-  seatMap.innerHTML = Object.entries(halls)
-    .map(([hall, seats]) => {
+function renderHall(name, seats) {
 
-      return `
-        <div class="seat-hall">
+  return `
+    <div class="seat-hall">
 
-          <div class="section-head">
-            <div>
-              <span class="eyebrow">${escapeHTML(hall)}</span>
-              <h3>Seat Map</h3>
-            </div>
-          </div>
-
-          <div class="seat-grid">
-
-            ${seats.map(seat => {
-
-              const status = seat.status || "available";
-
-              let symbol = "🟢";
-
-              if (status === "occupied") {
-                symbol = "🔴";
-              }
-
-              if (status === "reserved") {
-                symbol = "🟡";
-              }
-
-              return `
-                <button
-                  class="seat ${escapeHTML(status)}"
-                  onclick="selectSeat('${escapeHTML(seat.id)}')"
-                  ${status !== "available" ? "disabled" : ""}
-                >
-                  <span>${symbol}</span>
-                  <b>${escapeHTML(seat.seat_number)}</b>
-                </button>
-              `;
-
-            }).join("")}
-
-          </div>
-
+      <div class="section-head">
+        <div>
+          <span class="eyebrow">${name}</span>
+          <h3>Seat Map</h3>
         </div>
-      `;
+      </div>
 
-    }).join("");
+      <div class="seat-grid">
+
+        ${seats.map(seat => {
+
+          const status = seat.status || "available";
+
+          const icon =
+            status === "occupied" ? "🔴" :
+            status === "reserved" ? "🟡" :
+            "🟢";
+
+          return `
+            <button
+              class="seat ${escapeHTML(status)}"
+              onclick="selectSeat('${seat.id}')"
+              ${status !== "available" ? "disabled" : ""}
+            >
+              <span>${icon}</span>
+              <b>${escapeHTML(seat.seat_number)}</b>
+            </button>
+          `;
+
+        }).join("")}
+
+      </div>
+    </div>
+  `;
 }
 
 
 function updateSeatCounters() {
-
-  const total = allSeats.length;
 
   const available = allSeats.filter(
     seat => seat.status === "available"
@@ -170,20 +159,18 @@ function updateSeatCounters() {
     $("insideCount").textContent = occupied;
   }
 
-  const totalElements = document.querySelectorAll(
+  document.querySelectorAll(
     ".mini-stats div:first-child b"
-  );
-
-  totalElements.forEach(el => {
-    el.textContent = total;
+  ).forEach(el => {
+    el.textContent = allSeats.length;
   });
 }
 
 
-window.selectSeat = function (seatId) {
+window.selectSeat = function(seatId) {
 
   const seat = allSeats.find(
-    item => String(item.id) === String(seatId)
+    s => String(s.id) === String(seatId)
   );
 
   if (!seat) return;
@@ -192,34 +179,68 @@ window.selectSeat = function (seatId) {
     return;
   }
 
+  if (!currentUser) {
+
+    showModal(`
+      <h2>Seat ${escapeHTML(seat.seat_number)}</h2>
+
+      <p>
+        This seat is available.
+      </p>
+
+      <button
+        class="btn btn-primary full"
+        onclick="openLogin()"
+      >
+        Login to Continue
+      </button>
+    `);
+
+    return;
+  }
+
   showModal(`
     <h2>Seat ${escapeHTML(seat.seat_number)}</h2>
 
     <p>
-      ${escapeHTML(seat.hall || "Study Point Library")}
+      Hall: ${escapeHTML(seat.hall)}
     </p>
 
     <p>
-      This seat is currently available.
+      Seat is currently available.
     </p>
 
     <button
       class="btn btn-primary full"
-      onclick="openLogin()"
+      onclick="requestSeat('${seat.id}')"
     >
-      Login to Book This Seat
+      Select This Seat
     </button>
   `);
 };
 
 
-/* =========================================================
-   STUDENT AUTH
-   ========================================================= */
+window.requestSeat = function(seatId) {
 
-let currentUser = null;
-let currentProfile = null;
+  showModal(`
+    <h2>Seat Selection</h2>
 
+    <p>
+      Your seat selection system will be connected
+      to the membership/booking system next.
+    </p>
+
+    <button
+      class="btn btn-outline full"
+      onclick="closeModal()"
+    >
+      Close
+    </button>
+  `);
+};
+
+
+/* ================= AUTH ================= */
 
 async function loadCurrentUser() {
 
@@ -232,7 +253,7 @@ async function loadCurrentUser() {
   if (currentUser) {
     await loadProfile();
   } else {
-    updateStudentDashboard();
+    updateDashboard();
   }
 }
 
@@ -248,20 +269,20 @@ async function loadProfile() {
     .maybeSingle();
 
   if (error) {
-    console.error("Profile error:", error);
+    console.error("Profile:", error);
     return;
   }
 
-  currentProfile = data;
+  currentProfile = data || null;
 
-  updateStudentDashboard();
+  updateDashboard();
 
   await loadMembership();
   await loadAttendance();
 }
 
 
-function updateStudentDashboard() {
+function updateDashboard() {
 
   if (!currentUser) {
 
@@ -271,37 +292,32 @@ function updateStudentDashboard() {
     $("studentPlan").textContent = "—";
     $("studentValidity").textContent = "—";
     $("paymentStatus").textContent = "—";
+    $("studyTime").textContent = "0h 0m";
     $("liveBadge").textContent = "Logged out";
     $("checkBtn").textContent = "Login to Check In";
 
     return;
   }
 
-  const name =
+  $("studentName").textContent =
     currentProfile?.full_name ||
-    currentProfile?.name ||
     currentUser.email ||
     "Student";
 
-  const studentId =
-    currentProfile?.student_id ||
-    currentProfile?.id ||
-    currentUser.id;
-
-  $("studentName").textContent = name;
-  $("studentId").textContent = `ID: ${studentId}`;
+  $("studentId").textContent =
+    `ID: ${currentProfile?.student_id || "—"}`;
 
   $("liveBadge").textContent = "Logged in";
   $("checkBtn").textContent = "Check In / Check Out";
 }
 
 
+/* ================= LOGIN ================= */
+
 async function openLogin() {
 
   showModal(`
     <h2>Student Login</h2>
-
-    <p>Login to access your Study Point Library account.</p>
 
     <form id="loginForm">
 
@@ -319,27 +335,30 @@ async function openLogin() {
         required
       >
 
-      <button class="btn btn-primary full" type="submit">
+      <button
+        class="btn btn-primary full"
+        type="submit"
+      >
         Login
       </button>
 
     </form>
 
-    <br>
+    <p id="authMessage"></p>
 
     <button
       class="btn btn-outline full"
       onclick="openSignup()"
     >
-      Create Student Account
+      Create Account
     </button>
-
-    <p id="authMessage"></p>
   `);
 
-  $("loginForm").addEventListener("submit", loginStudent);
+  $("loginForm").addEventListener(
+    "submit",
+    loginStudent
+  );
 }
-
 
 window.openLogin = openLogin;
 
@@ -348,18 +367,26 @@ async function loginStudent(event) {
 
   event.preventDefault();
 
-  const email = $("loginEmail").value.trim();
-  const password = $("loginPassword").value;
+  const email =
+    $("loginEmail").value.trim();
 
-  $("authMessage").textContent = "Logging in...";
+  const password =
+    $("loginPassword").value;
 
-  const { error } = await supabaseClient.auth.signInWithPassword({
-    email,
-    password
-  });
+  $("authMessage").textContent =
+    "Logging in...";
+
+  const { error } =
+    await supabaseClient.auth.signInWithPassword({
+      email,
+      password
+    });
 
   if (error) {
-    $("authMessage").textContent = error.message;
+
+    $("authMessage").textContent =
+      error.message;
+
     return;
   }
 
@@ -369,12 +396,12 @@ async function loginStudent(event) {
 }
 
 
+/* ================= SIGNUP ================= */
+
 async function openSignup() {
 
   showModal(`
     <h2>Create Student Account</h2>
-
-    <p>Enter your details to create your library account.</p>
 
     <form id="signupForm">
 
@@ -407,7 +434,10 @@ async function openSignup() {
         required
       >
 
-      <button class="btn btn-primary full" type="submit">
+      <button
+        class="btn btn-primary full"
+        type="submit"
+      >
         Create Account
       </button>
 
@@ -423,184 +453,219 @@ async function openSignup() {
     </button>
   `);
 
-  $("signupForm").addEventListener("submit", signupStudent);
+  $("signupForm").addEventListener(
+    "submit",
+    signupStudent
+  );
 }
+
+window.openSignup = openSignup;
 
 
 async function signupStudent(event) {
 
   event.preventDefault();
 
-  const name = $("signupName").value.trim();
-  const studentId = $("signupStudentId").value.trim();
-  const email = $("signupEmail").value.trim();
-  const password = $("signupPassword").value;
+  const name =
+    $("signupName").value.trim();
 
-  $("authMessage").textContent = "Creating account...";
+  const studentId =
+    $("signupStudentId").value.trim();
 
-  const {
-    data,
-    error
-  } = await supabaseClient.auth.signUp({
-    email,
-    password
-  });
+  const email =
+    $("signupEmail").value.trim();
+
+  const password =
+    $("signupPassword").value;
+
+  $("authMessage").textContent =
+    "Creating account...";
+
+  const { data, error } =
+    await supabaseClient.auth.signUp({
+      email,
+      password
+    });
 
   if (error) {
-    $("authMessage").textContent = error.message;
+
+    $("authMessage").textContent =
+      error.message;
+
     return;
   }
 
   if (!data.user) {
+
     $("authMessage").textContent =
       "Account could not be created.";
+
     return;
   }
 
-  const { error: profileError } = await supabaseClient
-    .from("profiles")
-    .insert({
-      id: data.user.id,
-      full_name: name,
-      student_id: studentId,
-      role: "student"
-    });
+  const { error: profileError } =
+    await supabaseClient
+      .from("profiles")
+      .insert({
+        id: data.user.id,
+        student_id: studentId,
+        full_name: name,
+        role: "student"
+      });
 
   if (profileError) {
 
     console.error(profileError);
 
     $("authMessage").textContent =
-      "Account created, but profile setup needs attention.";
+      "Auth account created, but profile creation failed.";
 
     return;
   }
 
   $("authMessage").textContent =
-    "Account created successfully. Please login.";
+    "Account created successfully.";
 
-  setTimeout(openLogin, 1000);
+  setTimeout(() => {
+    openLogin();
+  }, 1000);
 }
 
 
-/* =========================================================
-   MEMBERSHIP
-   ========================================================= */
+/* ================= MEMBERSHIP ================= */
 
 async function loadMembership() {
 
   if (!currentUser) return;
 
-  const { data, error } = await supabaseClient
-    .from("memberships")
-    .select("*")
-    .eq("student_id", currentUser.id)
-    .order("created_at", { ascending: false })
-    .limit(1)
-    .maybeSingle();
+  const { data, error } =
+    await supabaseClient
+      .from("memberships")
+      .select("*")
+      .eq("student_id", currentUser.id)
+      .order("created_at", {
+        ascending: false
+      })
+      .limit(1)
+      .maybeSingle();
 
   if (error) {
-    console.error("Membership error:", error);
+
+    console.error("Membership:", error);
     return;
   }
 
   if (!data) return;
 
   $("studentPlan").textContent =
-    data.plan_type || "—";
+    data.plan || "—";
 
   $("studentValidity").textContent =
-    data.end_date || data.valid_until || "—";
+    data.end_date || "—";
 
   $("paymentStatus").textContent =
     data.payment_status || "—";
-
-  if (data.seat_id) {
-
-    const seat = allSeats.find(
-      s => String(s.id) === String(data.seat_id)
-    );
-
-    if (seat) {
-      $("studentSeat").textContent =
-        seat.seat_number;
-    }
-  }
 }
 
 
-/* =========================================================
-   ATTENDANCE
-   ========================================================= */
+/* ================= ATTENDANCE ================= */
 
 async function loadAttendance() {
 
   if (!currentUser) return;
 
-  const { data, error } = await supabaseClient
-    .from("attendance")
-    .select("*")
-    .eq("student_id", currentUser.id)
-    .order("check_in", { ascending: false })
-    .limit(50);
+  const { data, error } =
+    await supabaseClient
+      .from("attendance")
+      .select("*")
+      .eq("student_id", currentUser.id)
+      .order("check_in", {
+        ascending: false
+      })
+      .limit(100);
 
   if (error) {
-    console.error("Attendance error:", error);
+
+    console.error("Attendance:", error);
     return;
   }
 
-  let totalMinutes = 0;
+  let totalSeconds = 0;
 
   (data || []).forEach(record => {
 
     if (!record.check_in) return;
 
-    const start = new Date(record.check_in);
+    if (record.duration_seconds) {
 
-    const end = record.check_out
-      ? new Date(record.check_out)
-      : new Date();
+      totalSeconds +=
+        Number(record.duration_seconds);
 
-    const minutes =
-      Math.max(0, end - start) / 60000;
+      return;
+    }
 
-    totalMinutes += minutes;
+    if (!record.check_out) return;
+
+    const start =
+      new Date(record.check_in);
+
+    const end =
+      new Date(record.check_out);
+
+    totalSeconds +=
+      Math.max(
+        0,
+        (end - start) / 1000
+      );
   });
 
-  const hours = Math.floor(totalMinutes / 60);
-  const minutes = Math.floor(totalMinutes % 60);
+  const hours =
+    Math.floor(totalSeconds / 3600);
+
+  const minutes =
+    Math.floor(
+      (totalSeconds % 3600) / 60
+    );
 
   $("studyTime").textContent =
     `${hours}h ${minutes}m`;
 }
 
 
-/* =========================================================
-   CHECK IN / CHECK OUT
-   ========================================================= */
+/* ================= CHECK IN / OUT ================= */
 
 async function handleCheckButton() {
 
   if (!currentUser) {
+
     openLogin();
     return;
   }
 
-  const { data, error } = await supabaseClient
-    .from("attendance")
-    .select("*")
-    .eq("student_id", currentUser.id)
-    .is("check_out", null)
-    .maybeSingle();
+  const { data, error } =
+    await supabaseClient
+      .from("attendance")
+      .select("*")
+      .eq("student_id", currentUser.id)
+      .is("check_out", null)
+      .maybeSingle();
 
   if (error) {
-    console.error(error);
+
+    showModal(`
+      <h2>Attendance Error</h2>
+      <p>${escapeHTML(error.message)}</p>
+    `);
+
     return;
   }
 
   if (data) {
+
     await checkoutStudent(data);
+
   } else {
+
     await checkinStudent();
   }
 }
@@ -608,17 +673,13 @@ async function handleCheckButton() {
 
 async function checkinStudent() {
 
-  if (!currentUser) {
-    openLogin();
-    return;
-  }
-
-  const { error } = await supabaseClient
-    .from("attendance")
-    .insert({
-      student_id: currentUser.id,
-      check_in: new Date().toISOString()
-    });
+  const { error } =
+    await supabaseClient
+      .from("attendance")
+      .insert({
+        student_id: currentUser.id,
+        check_in: new Date().toISOString()
+      });
 
   if (error) {
 
@@ -641,12 +702,13 @@ async function checkinStudent() {
 
 async function checkoutStudent(record) {
 
-  const { error } = await supabaseClient
-    .from("attendance")
-    .update({
-      check_out: new Date().toISOString()
-    })
-    .eq("id", record.id);
+  const { error } =
+    await supabaseClient
+      .from("attendance")
+      .update({
+        check_out: new Date().toISOString()
+      })
+      .eq("id", record.id);
 
   if (error) {
 
@@ -667,56 +729,56 @@ async function checkoutStudent(record) {
 }
 
 
-/* =========================================================
-   NOTICES
-   ========================================================= */
+/* ================= NOTICES ================= */
 
 async function loadNotices() {
 
-  const { data, error } = await supabaseClient
-    .from("notices")
-    .select("*")
-    .order("created_at", { ascending: false })
-    .limit(10);
+  const { data, error } =
+    await supabaseClient
+      .from("notices")
+      .select("*")
+      .eq("published", true)
+      .order("created_at", {
+        ascending: false
+      })
+      .limit(10);
 
   if (error) {
-    console.error("Notice error:", error);
+
+    console.error("Notices:", error);
     return;
   }
 
-  const noticeList = $("noticeList");
-
   if (!data || !data.length) {
 
-    noticeList.innerHTML = `
+    $("noticeList").innerHTML = `
       <div class="info-card">
         <h3>No notices</h3>
-        <p>There are currently no library notices.</p>
+        <p>No library notices have been published.</p>
       </div>
     `;
 
     return;
   }
 
-  noticeList.innerHTML = data.map(notice => `
-    <article class="notice-card">
+  $("noticeList").innerHTML =
+    data.map(notice => `
+      <article class="notice-card">
 
-      <h3>
-        ${escapeHTML(notice.title || "Library Notice")}
-      </h3>
+        <h3>
+          ${escapeHTML(notice.title)}
+        </h3>
 
-      <p>
-        ${escapeHTML(notice.content || notice.message || "")}
-      </p>
+        <p>
+          ${escapeHTML(notice.body)}
+        </p>
 
-    </article>
-  `).join("");
+      </article>
+    `).join("");
 }
 
 
-/* =========================================================
-   QR
-   ========================================================= */
+/* ================= QR ================= */
 
 function openQR() {
 
@@ -724,8 +786,8 @@ function openQR() {
     <h2>Study Point Library QR</h2>
 
     <p>
-      Scan the permanent QR at the library entrance
-      to check IN or CHECK OUT.
+      Use the permanent QR at the library entrance
+      for attendance.
     </p>
 
     <div class="qr-placeholder">
@@ -733,16 +795,14 @@ function openQR() {
     </div>
 
     <p>
-      The final QR will be connected to the
-      student attendance system.
+      The final QR check-in/out flow will be connected
+      after the attendance security functions are added.
     </p>
   `);
 }
 
 
-/* =========================================================
-   MEMBERSHIP PLAN
-   ========================================================= */
+/* ================= PLANS ================= */
 
 window.selectPlan = function(plan) {
 
@@ -750,13 +810,8 @@ window.selectPlan = function(plan) {
     <h2>${escapeHTML(plan)}</h2>
 
     <p>
-      You selected:
-      <strong>${escapeHTML(plan)}</strong>
-    </p>
-
-    <p>
-      Login to your student account to continue
-      with seat selection and membership.
+      You selected
+      <strong>${escapeHTML(plan)}</strong>.
     </p>
 
     <button
@@ -769,14 +824,12 @@ window.selectPlan = function(plan) {
 };
 
 
-/* =========================================================
-   SUPABASE REALTIME
-   ========================================================= */
+/* ================= REALTIME ================= */
 
 function startRealtime() {
 
   supabaseClient
-    .channel("library-live-updates")
+    .channel("study-point-live")
 
     .on(
       "postgres_changes",
@@ -810,28 +863,25 @@ function startRealtime() {
 }
 
 
-/* =========================================================
-   AUTH STATE
-   ========================================================= */
+/* ================= AUTH STATE ================= */
 
 supabaseClient.auth.onAuthStateChange(
-  async (event, session) => {
+  async (_event, session) => {
 
-    currentUser = session?.user || null;
+    currentUser =
+      session?.user || null;
 
     if (currentUser) {
       await loadProfile();
     } else {
       currentProfile = null;
-      updateStudentDashboard();
+      updateDashboard();
     }
   }
 );
 
 
-/* =========================================================
-   BUTTONS
-   ========================================================= */
+/* ================= BUTTONS ================= */
 
 $("loginBtn")?.addEventListener(
   "click",
@@ -854,9 +904,7 @@ $("qrBtn2")?.addEventListener(
 );
 
 
-/* =========================================================
-   YEAR
-   ========================================================= */
+/* ================= YEAR ================= */
 
 if ($("year")) {
   $("year").textContent =
@@ -864,13 +912,13 @@ if ($("year")) {
 }
 
 
-/* =========================================================
-   START APPLICATION
-   ========================================================= */
+/* ================= START ================= */
 
 async function startApp() {
 
-  console.log("Study Point Library starting...");
+  console.log(
+    "Study Point Library starting..."
+  );
 
   await loadSeats();
 
@@ -881,7 +929,7 @@ async function startApp() {
   startRealtime();
 
   console.log(
-    "Study Point Library connected."
+    "Study Point Library connected to Supabase."
   );
 }
 
